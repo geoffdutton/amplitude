@@ -4,6 +4,13 @@
 
 Server side implementation of [Amplitude](https://amplitude.com)'s http api.
 
+## Amplitude V2 HTTP API
+The Amplitude V2 API has been implemented in Typescript. To use that:
+```bash
+npm install amplitude@next --save
+```
+Please report any issues you encounter. You can see the code on the [add-typescript](https://github.com/geoffdutton/amplitude/tree/add-typescript) branch.
+
 ## Install
 
 ```bash
