@@ -5,8 +5,8 @@ import Amplitude, {
   AmplitudeUserActivityResponse
 } from 'amplitude'
 
-const apiKey = process.env.AMPLITUDE_API_KEY || ''
-const secretKey = process.env.AMPLITUDE_SECRET_KEY || ''
+const apiKey = String(process.env.AMPLITUDE_API_KEY)
+const secretKey = String(process.env.AMPLITUDE_SECRET_KEY)
 
 ;(async function (): Promise<void> {
   try {
