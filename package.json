@@ -55,7 +55,7 @@
     "chai": "^4.2.0",
     "ecmascript-version-detector": "^1.0.3",
     "glob": "^7.1.6",
-    "mocha": "^7.0.1",
+    "mocha": "^7.1.2",
     "nock": "^11.8.2",
     "sinon": "^8.1.1",
     "sinon-chai": "^3.4.0",

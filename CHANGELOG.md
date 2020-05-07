@@ -1,5 +1,8 @@
 # Amplitude Change Log
 
+## v4.0.2
+- Update README
+
 ## v4.0.1
 - Changes maintainer
 
