@@ -1,11 +1,17 @@
 {
   "name": "amplitude",
-  "version": "4.0.3",
+  "version": "5.0.2",
   "description": "A node wrapper for Amplitude analytics http api",
   "author": "Blade Barringer <blade@crookedneighbor.com>",
+  "main": "entry.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "amplitude.js"
+    "dist",
+    "entry.js"
   ],
+  "engines": {
+    "node": ">=8.10.0"
+  },
   "contributors": [
     {
       "name": "Erki Esken",
@@ -19,7 +25,8 @@
     },
     {
       "name": "Geoff Dutton",
-      "email": "g.dutton@gmail.com"
+      "email": "g.dutton@gmail.com",
+      "url": "https://github.com/geoffdutton"
     },
     {
       "name": "Matt Pardee",
@@ -32,11 +39,16 @@
     }
   ],
   "scripts": {
+    "build": "rm -rf dist && tsc",
     "contributors": "node tasks/generate-contributors-list",
-    "lint": "standard | snazzy",
-    "test": "npm run lint && mocha"
+    "coverage": "codecov",
+    "lint": "eslint --ext .js,.ts .",
+    "prerelease": "npm version prerelease --preid=next && npm publish --tag next",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run test",
+    "test": "npm run lint && nyc --reporter=lcov --reporter=text mocha",
+    "tdd": "mocha --watch"
   },
-  "main": "amplitude.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/geoffdutton/amplitude"
@@ -49,33 +61,36 @@
     "amplitude"
   ],
   "dependencies": {
-    "superagent": "^5.2.1"
+    "axios": "^0.19.2"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/eslint": "^6.8.1",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.4",
+    "@types/sinon": "^9.0.3",
+    "@types/sinon-chai": "^3.2.4",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "chai": "^4.2.0",
+    "codecov": "^3.7.0",
     "ecmascript-version-detector": "^1.0.3",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.3",
     "glob": "^7.1.6",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.4",
     "mocha": "^7.1.2",
-    "nock": "^11.8.2",
-    "sinon": "^8.1.1",
-    "sinon-chai": "^3.4.0",
-    "snazzy": "^8.0.0",
-    "standard": "^14.3.1"
+    "nock": "^12.0.3",
+    "nyc": "^15.0.1",
+    "prettier": "1.19.1",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.9.3"
   },
   "license": "ISC",
-  "standard": {
-    "globals": [
-      "describe",
-      "context",
-      "before",
-      "beforeEach",
-      "after",
-      "afterEach",
-      "it",
-      "expect",
-      "sandbox"
-    ]
-  },
   "greenkeeper": {
     "ignore": [
       "nock"
@@ -85,8 +100,20 @@
     "colors": true,
     "reporter": "spec",
     "timeout": 8000,
-    "growl": true,
     "check-leaks": true,
-    "recursive": true
+    "recursive": true,
+    "require": "ts-node/register",
+    "extension": [
+      "ts",
+      "js"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": "eslint --cache --fix"
   }
 }

@@ -2,14 +2,10 @@
 
 ![Build Status](https://travis-ci.org/geoffdutton/amplitude.svg?branch=master) ![npm version](https://badge.fury.io/js/amplitude.svg) [![Greenkeeper badge](https://badges.greenkeeper.io/geoffdutton/amplitude.svg)](https://greenkeeper.io/)
 
-Server side implementation of [Amplitude](https://amplitude.com)'s http api.
+Server side implementation of [Amplitude](https://amplitude.com)'s HTTP API.
 
-## Amplitude V2 HTTP API
-The Amplitude V2 API has been implemented in Typescript. To use that:
-```bash
-npm install amplitude@next --save
-```
-Please report any issues you encounter. You can see the code on the [add-typescript](https://github.com/geoffdutton/amplitude/tree/add-typescript) branch.
+## Version 5+ Note ##
+For amplitude@5+, it uses Amplitude's [V2 HTTP API](https://help.amplitude.com/hc/en-us/articles/360032842391-HTTP-API-V2), which replaces the deprecated [V1 HTTP API](https://help.amplitude.com/hc/en-us/articles/204771828-HTTP-API-Deprecated-). This only affects the [`.track` method](#track-an-event). The only potential breaking change is by default `user_id` and `device_id` require a minimum of 5 characters.
 
 ## Install
 
@@ -20,20 +16,22 @@ npm install amplitude --save
 ## Basic Initialization
 
 ```javascript
-var Amplitude = require('amplitude')
+const Amplitude = require('amplitude')
 // The only required field is the api token
-var amplitude = new Amplitude('api-token')
+const amplitude = new Amplitude('api-token')
 ```
+
+See the [`examples/`](/examples) directory for further usage.
 
 ## Track an event
 
-Pass in any keys listed on the [Amplitude http api](https://amplitude.zendesk.com/hc/en-us/articles/204771828-HTTP-API). The only required keys are `event_type` and either `user_id` or `device_id`. If you initialized the Amplitude object with a user/device id, they can be ignored when calling the track method.
+Pass in any keys listed on the [Amplitude V2 HTTP API](https://help.amplitude.com/hc/en-us/articles/360032842391-HTTP-API-V2). The only required keys are `event_type` and either `user_id` or `device_id`. If you initialized the Amplitude object with a user/device id, they can be ignored when calling the track method. Note: the `user_id` and `device_id` must be 5 or more characters if passed.
 
 ```javascript
-var data = {
+const data = {
   event_type: 'some value', // required
-  user_id: 'some id', // only required if device id is not passed in
-  device_id: 'some id', // only required if user id is not passed in
+  user_id: 'some-user-id', // only required if device id is not passed in
+  device_id: 'some-device-id', // only required if user id is not passed in
   session_id: 1492789357923, // must be unix timestamp in ms, not required
   event_properties: {
     //...
@@ -42,12 +40,16 @@ var data = {
     //...
   }
 }
-amplitude.track(data)
+try {
+  await amplitude.track(data)
+} catch (err) {
+  console.error(err)
+}
 ```
 
 You can also pass an array of `event` objects:
 ```javascript
-var data = [
+const data = [
   {
     event_type: 'some value', // required
     user_id: 'some id', // only required if device id is not passed in
@@ -72,6 +74,9 @@ var data = [
   }
 ]
 amplitude.track(data)
+    .then(res => {
+      console.log('Amplitude response', res)
+    })
 ```
 
 ## Identify API
@@ -79,22 +84,31 @@ amplitude.track(data)
 The `identify` method allows you to [make changes to a user without sending an analytics event](https://amplitude.zendesk.com/hc/en-us/articles/205406617). 
 
 ```javascript
-var data = {
+const data = {
   user_id: 'some id', // only required if device id is not passed in
   device_id: 'some id', // only required if user id is not passed in
+  event_properties: {
+    //...
+  },
   user_properties: {
     //...
   }
 }
 amplitude.identify(data)
+    .then(res => {
+      console.log('Amplitude response', res)
+    })
 ```
 
 You can also pass an array of `identify` objects:
 ```javascript
-var data = [
+const data = [
   {
     user_id: 'some id', // only required if device id is not passed in
     device_id: 'some id', // only required if user id is not passed in
+    event_properties: {
+      //...
+    },
     user_properties: {
       //...
     }
@@ -102,18 +116,24 @@ var data = [
   {
     user_id: 'some id', // only required if device id is not passed in
     device_id: 'some id', // only required if user id is not passed in
+    event_properties: {
+      //...
+    },
     user_properties: {
       //...
     }
   }
 ]
 amplitude.identify(data)
+    .then(res => {
+      console.log('Amplitude response', res)
+    })
 ```
 
 With this method, you can also [modify user properties using property operations](https://amplitude.zendesk.com/hc/en-us/articles/205406617-Identify-API-Modify-User-Properties#keys-for-the-identification-argument). 
 
 ```javascript
-var data = {
+const data = {
   user_id: 'some id', // only required if device id is not passed in
   device_id: 'some id', // only required if user id is not passed in
   user_properties: {
@@ -127,8 +147,11 @@ var data = {
       //...
     }
   }
-};
-amplitude.identify(data);
+}
+amplitude.identify(data)
+    .then(res => {
+      console.log('Amplitude response', res)
+    })
 ```
 
 Note the limitation of mixing user property operations with top level properties. If you use any property operations (`$add`, `$append`, etc.), and you want to set a user property, it must be done using the `$set` operation.
@@ -138,7 +161,7 @@ Note the limitation of mixing user property operations with top level properties
 If you prefer camelCase variables, you can pass in the camelCase version instead to the `track` and `identify` methods:
 
 ```javascript
-var data = {
+const data = {
   eventType: 'some value', // required
   userId: 'some id', // only required if device id is not passed in
   deviceId: 'some id', // only required if user id is not passed in
@@ -151,6 +174,9 @@ var data = {
   }
 }
 amplitude.track(data)
+    .then(res => {
+      console.log('Amplitude response', res)
+    })
 ```
 
 This is the full list of properties that will be automatically transformed:
@@ -164,10 +190,10 @@ eventProperties -> event_properties
 userProperties -> user_properties
 appVersion -> app_version
 osName -> os_name
+osVersion -> os_version
 deviceBrand -> device_brand
 deviceManufacturer -> device_manufacturer
 deviceModel -> device_model
-deviceType -> device_type
 locationLat -> location_lat
 locationLng -> location_lng
 ```
@@ -177,20 +203,29 @@ locationLng -> location_lng
 If the user/device/session id will always be the same, you can initialize the object with it. Passing a user id or device id in the `track` and `identify` methods will override the default value set at initialization.
 
 ```javascript
-var amplitude = new Amplitude('api-token', { user_id: 'some-user-id' })
+const amplitude = new Amplitude('api-token', { user_id: 'some-user-id' })
 // or
-var amplitude = new Amplitude('api-token', { device_id: 'some-device-id' })
+const amplitude = new Amplitude('api-token', { device_id: 'some-device-id' })
 // or
-var amplitude = new Amplitude('api-token', { session_id: 1492789357923 })
+const amplitude = new Amplitude('api-token', { session_id: 1492789357923 })
 
-amplitude.track({
-  event_type: 'some value'
-})
+try {
+    await amplitude.track({
+      event_type: 'some value'
+    })
+} catch (err) {
+  console.error(err)
+}
+
+// Or...
 
 amplitude.track({
   event_type: 'some value',
   user_id: 'will-override-the-default-id'
 })
+    .then(res => {
+      console.log('Amplitude response', res)
+    })
 ```
 
 ### Promises
@@ -204,6 +239,17 @@ amplitude.track(data)
   }).catch(function(error) {
     //... do something
   })
+
+// Or..
+try {
+    const result = await amplitude.track({
+      event_type: 'some value'
+    })
+    //... do something with result
+} catch (error) {
+    console.error(error)
+    //... do something with the error
+}
 ```
 
 ## Dashboard API
@@ -215,10 +261,10 @@ The export method requires your [secret key](https://amplitude.zendesk.com/hc/en
 The method returns a stream.
 
 ```javascript
-var fs = require('fs')
-var stream = fs.createWriteStream('./may-2016-export.zip')
+const fs = require('fs')
+const stream = fs.createWriteStream('./may-2016-export.zip')
 
-var amplitude = new Amplitude('api-token', { secretKey: 'secret' })
+const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
 amplitude.export({
   start: '20160501T20',
@@ -233,17 +279,17 @@ The user search method requires your [secret key](https://amplitude.zendesk.com/
 Search for a user with a specified Amplitude ID, Device ID, User ID, or User ID prefix.
 
 ```javascript
-var amplitude = new Amplitude('api-token', { secretKey: 'secret' })
+const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
-amplitude.userSearch('user/device/amplitude id or user id prefix').then(function (res) {
-  var matches = res.matches // Array of matches
+amplitude.userSearch('user/device/amplitude id or user id prefix').then(res => {
+  const matches = res.matches // Array of matches
 
   // How the match was made
   // If exact match was made with user id or device id, type === 'match_user_or_device_id'
   // If exact match was made with Amplitude ID, type === 'match_amplitude_id'
   // If a partial match was made with a user id prefix, type === 'match_user_prefix'
   // If no match was made, type === 'nomatch'
-  var type = res.type
+  const type = res.type
 })
 ```
 
@@ -254,11 +300,11 @@ The user activity method requires your [secret key](https://amplitude.zendesk.co
 Get a user summary and their recent events. This method requires an Amplitude ID. You can use the [user search](#user-search) method to find that.
 
 ```javascript
-var amplitude = new Amplitude('api-token', { secretKey: 'secret' })
+const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
 amplitude.userActivity('Amplitude ID').then(function (res) {
-  var userData = res.userData // data about the user
-  var events = res.events // an array of events associated with the user
+  const userData = res.userData // data about the user
+  const events = res.events // an array of events associated with the user
 })
 ```
 
@@ -286,17 +332,17 @@ If there is nothing found for the passed Amplitude ID, the Promise will still re
 If you do not know the Amplitude ID, you can use the [userSearch](#user-search) method to find it.
 
 ```javascript
-var amplitude = new Amplitude('api-token', { secretKey: 'secret' })
+const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
 amplitude.userSearch('user-id').then(function (res) {
   // If you're using a prefix, you may get multiple matches and
   // you may need to handle the case where there is not a match
-  var match = res.matches[0]
+  const match = res.matches[0]
 
   return amplitude.userActivity(match.amplitude_id)
 }).then(function (res) {
-  var userData = res.userData // data about the user
-  var events = res.events // an array of events associated with the user
+  const userData = res.userData // data about the user
+  const events = res.events // an array of events associated with the user
 })
 ```
 
@@ -307,7 +353,7 @@ The event segmentation method requires your [secret key](https://amplitude.zende
 Get metrics for an event with segmentation.
 
 ```javascript
-var amplitude = new Amplitude('api-token', { secretKey: 'secret' })
+const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
 amplitude.eventSegmentation({
   e: {
@@ -317,7 +363,7 @@ amplitude.eventSegmentation({
   end: '20170117',
 })
 .then((res) => {
-  var segmentationData = res.data
+  const segmentationData = res.data
 })
 ```
 
@@ -347,7 +393,7 @@ If the event does not exist, Amplitude will throw a 400 error.
 
 ## Changelog
 
-View the [releases page](https://github.com/geoffdutton/amplitude/releases) for changes in each version.
+View the [CHANGELOG](/CHANGELOG.md) for changes in each version.
 
 <!---
 Do not change anything below this comment. It is generated automatically.
@@ -357,6 +403,6 @@ Do not change anything below this comment. It is generated automatically.
 
 + [Erki Esken](http://deekit.net/)
 + [Matthew Keesan](http://keesan.net)
-+ Geoff Dutton
++ [Geoff Dutton](https://github.com/geoffdutton)
 + Matt Pardee
 + [Chase Seibert](http://chase-seibert.github.io/blog/)

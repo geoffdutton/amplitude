@@ -1,10 +1,8 @@
-'use strict'
-
-const Amplitude = require('../amplitude')
+const Amplitude = require('../src').default
 const nock = require('nock')
 
-function generateMockedRequest (query, status) {
-  const mockedRequest = nock('https://amplitude.com')
+function generateMockedRequest(query, status) {
+  return nock('https://amplitude.com')
     .defaultReplyHeaders({ 'Content-Type': 'application/zip' })
     .get('/api/2/export')
     .query(query)
@@ -13,65 +11,82 @@ function generateMockedRequest (query, status) {
       pass: 'key'
     })
     .reply(status)
-
-  return mockedRequest
 }
 
-describe('export', function () {
-  beforeEach(function () {
-    this.amplitude = new Amplitude('token', {
+describe('export', () => {
+  let amplitude
+  let options
+
+  beforeEach(() => {
+    amplitude = new Amplitude('token', {
       secretKey: 'key'
     })
-    this.options = {
+    options = {
       start: '20160523T20',
       end: '20160525T20'
     }
   })
 
-  it('throws an error if secret key is missing', function () {
-    delete this.amplitude.secretKey
+  it('throws an error if secret key is missing', async () => {
+    amplitude.secretKey = undefined
 
-    expect(() => {
-      this.amplitude.export(this.options)
-    }).to.throw('secretKey must be set to use the export method')
+    let err
+    try {
+      await amplitude.export(options)
+    } catch (e) {
+      err = e
+    }
+
+    expect(err.message).to.eq('secretKey must be set to use the export method')
   })
 
-  it('throws an error if start param is missing', function () {
-    delete this.options.start
+  it('throws an error if start param is missing', async () => {
+    delete options.start
 
-    expect(() => {
-      this.amplitude.export(this.options)
-    }).to.throw('`start` and `end` are required options')
+    let err
+    try {
+      await amplitude.export(options)
+    } catch (e) {
+      err = e
+    }
+
+    expect(err.message).to.eq('`start` and `end` are required options')
   })
 
-  it('throws an error if end param is missing', function () {
-    delete this.options.end
+  it('throws an error if end param is missing', async () => {
+    delete options.end
 
-    expect(() => {
-      this.amplitude.export(this.options)
-    }).to.throw('`start` and `end` are required options')
+    let err
+    try {
+      await amplitude.export(options)
+    } catch (e) {
+      err = e
+    }
+
+    expect(err.message).to.eq('`start` and `end` are required options')
   })
 
-  it('resolves a zip when succesful', function () {
-    const mockedRequest = generateMockedRequest(this.options, 200)
+  it('resolves a zip when succesful', () => {
+    const mockedRequest = generateMockedRequest(options, 200)
 
-    return this.amplitude.export(this.options).then((data) => {
-      expect(data.res.headers['content-type']).to.eql('application/zip')
+    return amplitude.export(options).then(res => {
+      expect(res.headers['content-type']).to.eql('application/zip')
       mockedRequest.done()
-    }).catch((err) => {
-      expect(err).to.equal(undefined)
     })
   })
 
-  it('rejects with error when unsuccesful', function () {
-    const mockedRequest = generateMockedRequest(this.options, 403)
+  it('rejects with error when unsuccesful', () => {
+    const mockedRequest = generateMockedRequest(options, 403)
 
-    return this.amplitude.export(this.options).then((res) => {
-      throw new Error('Should not have resolved')
-    }).catch((err) => {
-      expect(err.status).to.eql(403)
-      expect(err.message).to.eql('Forbidden')
-      mockedRequest.done()
-    })
+    return amplitude
+      .export(options)
+      .then(res => {
+        expect(res).not.to.exist
+        throw new Error('Should not have resolved')
+      })
+      .catch(err => {
+        expect(err.status).to.eq(403)
+        mockedRequest.done()
+      })
   })
 })

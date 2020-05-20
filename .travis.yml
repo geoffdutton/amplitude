@@ -3,7 +3,9 @@ node_js:
   - '8'
   - '10'
   - '12'
-sudo: false
+
+after_success:
+  - npm run coverage
 notifications:
   email:
     on_success: change

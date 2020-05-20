@@ -1,11 +1,10 @@
-'use strict'
-
-const Amplitude = require('../amplitude')
+const Amplitude = require('../src').default
 
 describe('initialization', () => {
   it('throws an error if no api token is passed', () => {
     expect(() => {
-      let amplitude = new Amplitude() // eslint-disable-line
+      // eslint-disable-next-line no-new
+      new Amplitude()
     }).to.throw('No token provided')
   })
 
@@ -28,7 +27,10 @@ describe('initialization', () => {
   })
 
   it('prefers userId over user_id to set userId', () => {
-    const amplitude = new Amplitude('token', { userId: 'userId', user_id: 'user_id' })
+    const amplitude = new Amplitude('token', {
+      userId: 'userId',
+      user_id: 'user_id'
+    })
 
     expect(amplitude.userId).to.eql('userId')
   })
@@ -46,7 +48,10 @@ describe('initialization', () => {
   })
 
   it('prefers deviceId over device_id to set deviceId', () => {
-    const amplitude = new Amplitude('token', { deviceId: 'deviceId', device_id: 'device_id' })
+    const amplitude = new Amplitude('token', {
+      deviceId: 'deviceId',
+      device_id: 'device_id'
+    })
 
     expect(amplitude.deviceId).to.eql('deviceId')
   })
@@ -70,7 +75,10 @@ describe('initialization', () => {
   })
 
   it('prefers sessionId over session_id to set sessionId', () => {
-    const amplitude = new Amplitude('token', { sessionId: 'sessionId', session_id: 'session_id' })
+    const amplitude = new Amplitude('token', {
+      sessionId: 'sessionId',
+      session_id: 'session_id'
+    })
 
     expect(amplitude.sessionId).to.eql('sessionId')
   })

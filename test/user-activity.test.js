@@ -1,9 +1,7 @@
-'use strict'
-
 const nock = require('nock')
-const Amplitude = require('../amplitude')
+const Amplitude = require('../src').default
 
-function generateMockedRequest (userSearchId, matches, status) {
+function generateMockedRequest(userSearchId, matches, status) {
   let query = { user: userSearchId }
 
   if (typeof userSearchId === 'object') {
@@ -19,8 +17,8 @@ function generateMockedRequest (userSearchId, matches, status) {
     .reply(status, matches)
 }
 
-describe('userActivity', function () {
-  beforeEach(function () {
+describe('userActivity', function() {
+  beforeEach(function() {
     this.amplitude = new Amplitude('token', {
       secretKey: 'key'
     })
@@ -32,9 +30,7 @@ describe('userActivity', function () {
           purchases: 0,
           revenue: 0,
           start_version: '',
-          merged_amplitude_ids: [
-            22222222222
-          ],
+          merged_amplitude_ids: [22222222222],
           num_events: 18,
           ip_address: '1.1.1.1',
           last_used: '2016-11-09',
@@ -100,7 +96,7 @@ describe('userActivity', function () {
     }
   })
 
-  it('throws an error if secret key is missing', function () {
+  it('throws an error if secret key is missing', function() {
     delete this.amplitude.secretKey
 
     expect(() => {
@@ -108,58 +104,71 @@ describe('userActivity', function () {
     }).to.throw('secretKey must be set to use the userActivity method')
   })
 
-  it('throws an error if nothing passed', function () {
+  it('throws an error if nothing passed', function() {
     expect(() => {
       this.amplitude.userActivity()
     }).to.throw('Amplitude ID must be passed')
   })
 
-  it('resolves user data and list of events when passed an existing Amplitude ID', function () {
+  it('resolves user data and list of events when passed an existing Amplitude ID', function() {
     const amplitudeId = 11111111
-    const mockedRequest = generateMockedRequest(amplitudeId, this.userSearchIds.found, 200)
+    const mockedRequest = generateMockedRequest(
+      amplitudeId,
+      this.userSearchIds.found,
+      200
+    )
 
-    return this.amplitude.userActivity(amplitudeId).then((res) => {
+    return this.amplitude.userActivity(amplitudeId).then(res => {
       expect(res.type).to.eql(this.userSearchIds.found_by_user_props)
       mockedRequest.done()
-    }).catch((err) => {
-      expect(err).to.equal(undefined)
     })
   })
 
-  it('should accept `limit` and `offset` as query params ', function () {
+  it('should accept `limit` and `offset` as query params ', function() {
     const search = 'cant-find-me'
-    const mockedRequest = generateMockedRequest({ user: search, limit: 0 }, this.userSearchIds.found, 200)
+    const mockedRequest = generateMockedRequest(
+      { user: search, limit: 0 },
+      this.userSearchIds.found,
+      200
+    )
 
-    return this.amplitude.userActivity(search, { limit: 0 }).then((res) => {
+    return this.amplitude.userActivity(search, { limit: 0 }).then(res => {
       expect(res).to.eql(this.userSearchIds.found)
       mockedRequest.done()
-    }).catch((err) => {
-      expect(err).to.equal(undefined)
     })
   })
 
-  it('resolves an empty userData object if the id cannot be found', function () {
+  it('resolves an empty userData object if the id cannot be found', function() {
     const search = 'cant-find-me'
-    const mockedRequest = generateMockedRequest(search, this.userSearchIds.not_found, 200)
+    const mockedRequest = generateMockedRequest(
+      search,
+      this.userSearchIds.not_found,
+      200
+    )
 
-    return this.amplitude.userActivity(search).then((res) => {
+    return this.amplitude.userActivity(search).then(res => {
       expect(res).to.eql(this.userSearchIds.not_found)
       mockedRequest.done()
-    }).catch((err) => {
-      expect(err).to.equal(undefined)
     })
   })
 
-  it('rejects with error when unsuccesful', function () {
+  it('rejects with error when unsuccessful', function() {
     const search = 'cant-find-me'
-    const mockedRequest = generateMockedRequest(search, this.userSearchIds.found, 403)
+    const mockedRequest = generateMockedRequest(
+      search,
+      this.userSearchIds.found,
+      403
+    )
 
-    return this.amplitude.userActivity(search).then((res) => {
-      throw new Error('Should not have resolved')
-    }).catch((err) => {
-      expect(err.status).to.eql(403)
-      expect(err.message).to.eql('Forbidden')
-      mockedRequest.done()
-    })
+    return this.amplitude
+      .userActivity(search)
+      .then(res => {
+        expect(res).not.to.exist
+        throw new Error('Should not have resolved')
+      })
+      .catch(err => {
+        expect(err.status).to.eq(403)
+        mockedRequest.done()
+      })
   })
 })

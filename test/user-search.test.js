@@ -1,9 +1,8 @@
-'use strict'
-
 const nock = require('nock')
-const Amplitude = require('../amplitude')
+const sinon = require('sinon')
+const Amplitude = require('../src').default
 
-function generateMockedRequest (userSearchId, matches, status) {
+function generateMockedRequest(userSearchId, matches, status) {
   return nock('https://amplitude.com')
     .defaultReplyHeaders({ 'Content-Type': 'application/json' })
     .get('/api/2/usersearch')
@@ -17,13 +16,15 @@ function generateMockedRequest (userSearchId, matches, status) {
     .reply(status, matches)
 }
 
-describe('userSearch', function () {
-  beforeEach(function () {
+describe('userSearch', function() {
+  let userActivityStub
+
+  beforeEach(function() {
     this.amplitude = new Amplitude('token', {
       secretKey: 'key'
     })
 
-    this.userActivityStub = this.sandbox.stub(this.amplitude, 'userActivity')
+    userActivityStub = sinon.stub(this.amplitude, 'userActivity')
 
     this.userSearchIds = {
       found_by_amplitude_id: {
@@ -60,7 +61,11 @@ describe('userSearch', function () {
     }
   })
 
-  it('throws an error if secret key is missing', function () {
+  afterEach(() => {
+    sinon.restore()
+  })
+
+  it('throws an error if secret key is missing', function() {
     delete this.amplitude.secretKey
 
     expect(() => {
@@ -68,79 +73,95 @@ describe('userSearch', function () {
     }).to.throw('secretKey must be set to use the userSearch method')
   })
 
-  it('throws an error if nothing passed', function () {
+  it('throws an error if nothing passed', function() {
     expect(() => {
       this.amplitude.userSearch()
     }).to.throw('value to search for must be passed')
   })
 
-  it('resolves matches found by an amplitude_id', function () {
+  it('resolves matches found by an amplitude_id', function() {
     const search = '111111111'
-    const mockedRequest = generateMockedRequest(search, this.userSearchIds.found_by_amplitude_id, 200)
+    const mockedRequest = generateMockedRequest(
+      search,
+      this.userSearchIds.found_by_amplitude_id,
+      200
+    )
 
-    return this.amplitude.userSearch(search).then((res) => {
+    return this.amplitude.userSearch(search).then(res => {
       expect(res.matches).to.be.a('array')
-      expect(res.matches.length).to.eql(1)
+      expect(res.matches.length).to.eq(1)
       expect(res.type).to.eql('match_amplitude_id')
-      expect(this.userActivityStub).to.not.be.called // eslint-disable-line
+      // eslint-disable-next-line no-unused-expressions
+      expect(userActivityStub).to.not.be.called
       mockedRequest.done()
-    }).catch((err) => {
-      expect(err).to.equal(undefined)
     })
   })
 
-  it('resolves matches found by a user property', function () {
+  it('resolves matches found by a user property', function() {
     const search = 'user_id_2'
-    const mockedRequest = generateMockedRequest(search, this.userSearchIds.found_by_user_props, 200)
+    const mockedRequest = generateMockedRequest(
+      search,
+      this.userSearchIds.found_by_user_props,
+      200
+    )
 
-    return this.amplitude.userSearch(search).then((res) => {
+    return this.amplitude.userSearch(search).then(res => {
       expect(res.matches).to.be.a('array')
-      expect(res.matches.length).to.eql(1)
+      expect(res.matches.length).to.eq(1)
       expect(res.type).to.eql('match_user_props')
       mockedRequest.done()
-    }).catch((err) => {
-      expect(err).to.equal(undefined)
     })
   })
 
-  it('resolves matches found by a device or user id', function () {
+  it('resolves matches found by a device or user id', function() {
     const search = 'user_id_3'
-    const mockedRequest = generateMockedRequest(search, this.userSearchIds.found_by_user_or_device_id, 200)
+    const mockedRequest = generateMockedRequest(
+      search,
+      this.userSearchIds.found_by_user_or_device_id,
+      200
+    )
 
-    return this.amplitude.userSearch(search).then((res) => {
+    return this.amplitude.userSearch(search).then(res => {
       expect(res.matches).to.be.a('array')
-      expect(res.matches.length).to.eql(1)
+      expect(res.matches.length).to.eq(1)
       expect(res.type).to.eql('match_user_or_device_id')
       mockedRequest.done()
-    }).catch((err) => {
-      expect(err).to.equal(undefined)
     })
   })
 
-  it('resolves zero matches when none found', function () {
+  it('resolves zero matches when none found', function() {
     const search = 'cant-find-me'
-    const mockedRequest = generateMockedRequest(search, this.userSearchIds.not_found, 200)
+    const mockedRequest = generateMockedRequest(
+      search,
+      this.userSearchIds.not_found,
+      200
+    )
 
-    return this.amplitude.userSearch(search).then((res) => {
+    return this.amplitude.userSearch(search).then(res => {
       expect(res.matches).to.be.a('array')
-      expect(res.matches.length).to.eql(0)
+      expect(res.matches.length).to.eq(0)
       expect(res.type).to.eql('nomatch')
       mockedRequest.done()
-    }).catch((err) => {
-      expect(err).to.equal(undefined)
     })
   })
 
-  it('rejects with error when unsuccesful', function () {
+  it('rejects with error when unsuccesful', function() {
     const search = 'cant-find-me'
-    const mockedRequest = generateMockedRequest(search, this.userSearchIds.found_by_amplitude_id, 403)
+    const mockedRequest = generateMockedRequest(
+      search,
+      this.userSearchIds.found_by_amplitude_id,
+      403
+    )
 
-    return this.amplitude.userSearch(search).then((res) => {
-      throw new Error('Should not have resolved')
-    }).catch((err) => {
-      expect(err.status).to.eql(403)
-      expect(err.message).to.eql('Forbidden')
-      mockedRequest.done()
-    })
+    return this.amplitude
+      .userSearch(search)
+      .then(res => {
+        expect(res).not.to.exist
+        throw new Error('Should not have resolved')
+      })
+      .catch(err => {
+        expect(err.status).to.eq(403)
+        mockedRequest.done()
+      })
   })
 })
