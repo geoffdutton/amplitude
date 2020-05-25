@@ -71,7 +71,7 @@
     "@types/sinon": "^9.0.3",
     "@types/sinon-chai": "^3.2.4",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
+    "@typescript-eslint/parser": "^3.0.1",
     "chai": "^4.2.0",
     "codecov": "^3.7.0",
     "ecmascript-version-detector": "^1.0.3",
