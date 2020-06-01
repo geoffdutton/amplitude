@@ -3,6 +3,7 @@ export interface AmplitudeOptions {
   userId?: string
   deviceId?: string
   sessionId?: string
+  tokenEndpoint?: string
 
   user_id?: string
   device_id?: string

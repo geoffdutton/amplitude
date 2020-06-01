@@ -10,7 +10,8 @@ const dateNow = 1582656323247
 
 function generateMockedRequest(
   events: AmplitudeRequestData | Array<AmplitudeRequestData>,
-  status: number
+  status: number,
+  endpoint?: string
 ): nock.Scope {
   if (!Array.isArray(events)) {
     events = [events]
@@ -28,7 +29,7 @@ function generateMockedRequest(
     events_ingested: events.length
   }
 
-  return nock('https://api.amplitude.com')
+  return nock(endpoint || 'https://api.amplitude.com')
     .post('/2/httpapi', matcher)
     .reply(status, response)
 }
@@ -55,8 +56,50 @@ describe('track', () => {
     }
   })
 
+  afterEach(() => {
+    delete process.env.AMPLITUDE_TOKEN_ENDPOINT
+  })
+
   it('resolves when the request succeeds', () => {
     const mockedRequest = generateMockedRequest(mockRequestData, 200)
+
+    return amplitude.track(data).then(res => {
+      expect(res.code).to.eq(200)
+      mockedRequest.done()
+    })
+  })
+
+  it('accepts a tokenEndpoint option', () => {
+    const mockedRequest = generateMockedRequest(
+      mockRequestData,
+      200,
+      'https://api2.amplitude.com'
+    )
+
+    amplitude = new Amplitude('token', {
+      user_id: 'unique_user_id',
+      device_id: 'unique_device_id',
+      tokenEndpoint: 'https://api2.amplitude.com'
+    })
+
+    return amplitude.track(data).then(res => {
+      expect(res.code).to.eq(200)
+      mockedRequest.done()
+    })
+  })
+
+  it('check for env variable for token endpoint', () => {
+    process.env.AMPLITUDE_TOKEN_ENDPOINT = 'https://api2.amplitude.com'
+    const mockedRequest = generateMockedRequest(
+      mockRequestData,
+      200,
+      'https://api2.amplitude.com'
+    )
+
+    amplitude = new Amplitude('token', {
+      user_id: 'unique_user_id',
+      device_id: 'unique_device_id'
+    })
 
     return amplitude.track(data).then(res => {
       expect(res.code).to.eq(200)
