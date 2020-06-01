@@ -18,7 +18,7 @@ import {
 import { AmplitudePostRequestData } from './interfaces'
 import { AmplitudeErrorResponse, axiosErrorCatcher } from './errors'
 
-const AMPLITUDE_TOKEN_ENDPOINT = 'https://api2.amplitude.com/2/httpapi'
+const AMPLITUDE_TOKEN_ENDPOINT = 'https://api2.amplitude.com'
 const AMPLITUDE_DASHBOARD_ENDPOINT = 'https://amplitude.com/api/2'
 axios.defaults.headers.common['User-Agent'] = `amplitude/${
   require('../package').version
