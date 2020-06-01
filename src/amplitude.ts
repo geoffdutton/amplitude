@@ -45,6 +45,7 @@ const camelCaseToSnakeCasePropertyMap: {
 
 export default class Amplitude {
   private readonly token: string
+  private readonly tokenEndpoint: string
   private readonly secretKey?: string
   private readonly userId?: string
   private readonly deviceId?: string
@@ -56,6 +57,10 @@ export default class Amplitude {
     }
 
     this.token = token
+    this.tokenEndpoint =
+      options.tokenEndpoint ||
+      process.env.AMPLITUDE_TOKEN_ENDPOINT ||
+      AMPLITUDE_TOKEN_ENDPOINT
     this.secretKey = options.secretKey
     this.userId = options.userId || options.user_id
     this.deviceId = options.deviceId || options.device_id
@@ -109,7 +114,7 @@ export default class Amplitude {
 
     return axiosErrorCatcher(
       axios
-        .post(`${AMPLITUDE_TOKEN_ENDPOINT}/identify`, encodedParams, {
+        .post(`${this.tokenEndpoint}/identify`, encodedParams, {
           headers: {
             'content-type': 'application/x-www-form-urlencoded'
           }
@@ -132,7 +137,7 @@ export default class Amplitude {
 
     return axiosErrorCatcher(
       axios
-        .post(`${AMPLITUDE_TOKEN_ENDPOINT}/2/httpapi`, params)
+        .post(`${this.tokenEndpoint}/2/httpapi`, params)
         .then(res => res.data)
     ) as Promise<AmplitudeTrackResponse>
   }
