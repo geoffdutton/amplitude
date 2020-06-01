@@ -1,6 +1,6 @@
 # Amplitude Change Log
 
-## v5.1.0
+## v5.1.1
 As of 2020-05-30, Amplitude reported issues with their SSL certificate, so they set up an endpoint and alternate endpoint at `https://api2.amplitude.com`. Read about it on [Amplitude's Status Page](https://status.amplitude.com/incidents/lf2pwqnyrn6s) and affected devices [here](https://calnetweb.berkeley.edu/calnet-technologists/incommon-sectigo-certificate-service/addtrust-external-root-expiration-may-2020).
 - Add option to set token endpoint via an environment variable, i.e. `AMPLITUDE_TOKEN_ENDPOINT="https://api2.amplitude.com"`
 - Add option to set token endpoint via constructor options, i.e. `https://api2.amplitude.com`
