@@ -4,6 +4,21 @@
 
 Server side implementation of [Amplitude](https://amplitude.com)'s HTTP API.
 
+## Amplitude SSL Issue
+As of 2020-05-30, Amplitude reported issues with their SSL certificate, so they set up an endpoint and alternate endpoint at `https://api2.amplitude.com`. Read about it on [Amplitude's Status Page](https://status.amplitude.com/incidents/lf2pwqnyrn6s) and affected devices [here](https://calnetweb.berkeley.edu/calnet-technologists/incommon-sectigo-certificate-service/addtrust-external-root-expiration-may-2020).
+
+As of v5.1.0+, you can use the alternative endpoint by setting the environment variable:
+```bash
+AMPLITUDE_TOKEN_ENDPOINT = 'https://api2.amplitude.com'
+```
+
+Or in the constructor:
+```javascript
+const amplitude = new Amplitude('api-token', {
+  tokenEndpoint: 'https://api2.amplitude.com'
+})
+```
+
 ## Version 5+ Note ##
 For amplitude@5+, it uses Amplitude's [V2 HTTP API](https://help.amplitude.com/hc/en-us/articles/360032842391-HTTP-API-V2), which replaces the deprecated [V1 HTTP API](https://help.amplitude.com/hc/en-us/articles/204771828-HTTP-API-Deprecated-). This only affects the [`.track` method](#track-an-event). The only potential breaking change is by default `user_id` and `device_id` require a minimum of 5 characters.
 
