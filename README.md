@@ -1,6 +1,6 @@
 # amplitude
 
-![Build Status](https://travis-ci.org/geoffdutton/amplitude.svg?branch=master) ![npm version](https://badge.fury.io/js/amplitude.svg) [![Greenkeeper badge](https://badges.greenkeeper.io/geoffdutton/amplitude.svg)](https://greenkeeper.io/)
+![Build Status](https://travis-ci.org/geoffdutton/amplitude.svg?branch=master) ![npm version](https://badge.fury.io/js/amplitude.svg) [![Known Vulnerabilities](https://snyk.io/test/github/geoffdutton/amplitude/badge.svg?targetFile=package.json)](https://snyk.io/test/github/geoffdutton/amplitude?targetFile=package.json)
 
 Server side implementation of [Amplitude](https://amplitude.com)'s HTTP API.
 
