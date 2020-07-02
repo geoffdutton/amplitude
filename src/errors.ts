@@ -3,7 +3,7 @@ import { AmplitudeResponseBody } from './responses'
 
 export class AmplitudeErrorResponse extends Error {
   readonly status: number
-  private data: object | string
+  private data: unknown
 
   constructor(err: AxiosError) {
     super(err.message)

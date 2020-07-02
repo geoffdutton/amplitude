@@ -21,6 +21,7 @@ import { AmplitudeErrorResponse, axiosErrorCatcher } from './errors'
 const AMPLITUDE_TOKEN_ENDPOINT = 'https://api.amplitude.com'
 const AMPLITUDE_DASHBOARD_ENDPOINT = 'https://amplitude.com/api/2'
 axios.defaults.headers.common['User-Agent'] = `amplitude/${
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../package').version
 } node/${process.version} (${process.arch})`
 
@@ -75,7 +76,6 @@ export default class Amplitude {
     }
 
     return data.map((item: AmplitudeRequestData) => {
-      /* eslint-disable @typescript-eslint/camelcase */
       return Object.keys(item).reduce(
         (obj: AmplitudeRequestData, key: string) => {
           const transformedKey = camelCaseToSnakeCasePropertyMap[key] || key
@@ -91,8 +91,6 @@ export default class Amplitude {
           user_id: item.user_id || this.userId
         } as AmplitudeRequestData
       )
-
-      /* eslint-enable @typescript-eslint/camelcase */
     }) as [AmplitudePostRequestData]
   }
 
@@ -101,7 +99,6 @@ export default class Amplitude {
   ): Promise<AmplitudeIdentifyResponse> {
     const transformedData = this._generateRequestData(data)
     const params: StringMap = {
-      // eslint-disable-next-line @typescript-eslint/camelcase
       api_key: this.token,
       identification: JSON.stringify(transformedData)
     }
@@ -129,7 +126,6 @@ export default class Amplitude {
   ): Promise<AmplitudeTrackResponse> {
     const transformedData = this._generateRequestData(data)
     const params = {
-      // eslint-disable-next-line @typescript-eslint/camelcase
       api_key: this.token,
       events: transformedData,
       options

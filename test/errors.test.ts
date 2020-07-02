@@ -4,7 +4,7 @@ import { AmplitudeErrorResponse, axiosErrorCatcher } from '../src/errors'
 interface MockAxiosError extends Error {
   response?: {
     status: number
-    data: object | string
+    data: unknown
   }
 }
 

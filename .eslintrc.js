@@ -1,12 +1,7 @@
 module.exports = {
   root: true,
-  extends: [
-    'prettier',
-    'eslint:recommended'
-  ],
-  plugins: [
-    'prettier'
-  ],
+  extends: ['prettier', 'eslint:recommended'],
+  plugins: ['prettier'],
   parserOptions: {
     ecmaVersion: 8
   },
@@ -29,9 +24,7 @@ module.exports = {
         'plugin:@typescript-eslint/recommended'
       ],
       parser: '@typescript-eslint/parser',
-      plugins: [
-        '@typescript-eslint'
-      ],
+      plugins: ['@typescript-eslint'],
       rules: {
         '@typescript-eslint/member-delimiter-style': 'off'
       }

@@ -234,7 +234,7 @@ export interface AmplitudeExportOptions {
 export interface AmplitudeSegmentationOptions {
   start?: Date
   end?: Date
-  e?: string | object
+  e?: unknown
 }
 
 export interface AmplitudeUserActivityOptions {
