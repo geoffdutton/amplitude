@@ -1,5 +1,8 @@
 # Amplitude Change Log
 
+## v5.1.4
+- Update `axios` to latest to fix issing of missing `ProgressEvent` when using Typescript
+
 ## v5.1.3
 
 - Update `axios` and `node-fetch`
