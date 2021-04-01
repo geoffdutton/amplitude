@@ -1,7 +1,10 @@
 # Amplitude Change Log
 
+## v5.1.5
+- Security update for `y18n` 
+
 ## v5.1.4
-- Update `axios` to latest to fix issing of missing `ProgressEvent` when using Typescript
+- Update `axios` to latest to fix the issue of missing `ProgressEvent` when using Typescript
 
 ## v5.1.3
 
