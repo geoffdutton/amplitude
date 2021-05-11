@@ -5,21 +5,25 @@
 Server side implementation of [Amplitude](https://amplitude.com)'s HTTP API.
 
 ## Amplitude SSL Issue
+
 As of 2020-05-30, Amplitude reported issues with their SSL certificate, so they set up an endpoint and alternate endpoint at `https://api2.amplitude.com`. Read about it on [Amplitude's Status Page](https://status.amplitude.com/incidents/lf2pwqnyrn6s) and affected devices [here](https://calnetweb.berkeley.edu/calnet-technologists/incommon-sectigo-certificate-service/addtrust-external-root-expiration-may-2020).
 
 As of v5.1.0+, you can use the alternative endpoint by setting the environment variable:
+
 ```bash
 AMPLITUDE_TOKEN_ENDPOINT = 'https://api2.amplitude.com'
 ```
 
 Or in the constructor:
+
 ```javascript
 const amplitude = new Amplitude('api-token', {
   tokenEndpoint: 'https://api2.amplitude.com'
 })
 ```
 
-## Version 5+ Note ##
+## Version 5+ Note
+
 For amplitude@5+, it uses Amplitude's [V2 HTTP API](https://help.amplitude.com/hc/en-us/articles/360032842391-HTTP-API-V2), which replaces the deprecated [V1 HTTP API](https://help.amplitude.com/hc/en-us/articles/204771828-HTTP-API-Deprecated-). This only affects the [`.track` method](#track-an-event). The only potential breaking change is by default `user_id` and `device_id` require a minimum of 5 characters.
 
 ## Install
@@ -63,6 +67,7 @@ try {
 ```
 
 You can also pass an array of `event` objects:
+
 ```javascript
 const data = [
   {
@@ -88,15 +93,14 @@ const data = [
     }
   }
 ]
-amplitude.track(data)
-    .then(res => {
-      console.log('Amplitude response', res)
-    })
+amplitude.track(data).then(res => {
+  console.log('Amplitude response', res)
+})
 ```
 
 ## Identify API
 
-The `identify` method allows you to [make changes to a user without sending an analytics event](https://amplitude.zendesk.com/hc/en-us/articles/205406617). 
+The `identify` method allows you to [make changes to a user without sending an analytics event](https://amplitude.zendesk.com/hc/en-us/articles/205406617).
 
 ```javascript
 const data = {
@@ -109,13 +113,13 @@ const data = {
     //...
   }
 }
-amplitude.identify(data)
-    .then(res => {
-      console.log('Amplitude response', res)
-    })
+amplitude.identify(data).then(res => {
+  console.log('Amplitude response', res)
+})
 ```
 
 You can also pass an array of `identify` objects:
+
 ```javascript
 const data = [
   {
@@ -139,13 +143,12 @@ const data = [
     }
   }
 ]
-amplitude.identify(data)
-    .then(res => {
-      console.log('Amplitude response', res)
-    })
+amplitude.identify(data).then(res => {
+  console.log('Amplitude response', res)
+})
 ```
 
-With this method, you can also [modify user properties using property operations](https://amplitude.zendesk.com/hc/en-us/articles/205406617-Identify-API-Modify-User-Properties#keys-for-the-identification-argument). 
+With this method, you can also [modify user properties using property operations](https://amplitude.zendesk.com/hc/en-us/articles/205406617-Identify-API-Modify-User-Properties#keys-for-the-identification-argument).
 
 ```javascript
 const data = {
@@ -163,10 +166,9 @@ const data = {
     }
   }
 }
-amplitude.identify(data)
-    .then(res => {
-      console.log('Amplitude response', res)
-    })
+amplitude.identify(data).then(res => {
+  console.log('Amplitude response', res)
+})
 ```
 
 Note the limitation of mixing user property operations with top level properties. If you use any property operations (`$add`, `$append`, etc.), and you want to set a user property, it must be done using the `$set` operation.
@@ -188,10 +190,9 @@ const data = {
     //...
   }
 }
-amplitude.track(data)
-    .then(res => {
-      console.log('Amplitude response', res)
-    })
+amplitude.track(data).then(res => {
+  console.log('Amplitude response', res)
+})
 ```
 
 This is the full list of properties that will be automatically transformed:
@@ -225,22 +226,23 @@ const amplitude = new Amplitude('api-token', { device_id: 'some-device-id' })
 const amplitude = new Amplitude('api-token', { session_id: 1492789357923 })
 
 try {
-    await amplitude.track({
-      event_type: 'some value'
-    })
+  await amplitude.track({
+    event_type: 'some value'
+  })
 } catch (err) {
   console.error(err)
 }
 
 // Or...
 
-amplitude.track({
-  event_type: 'some value',
-  user_id: 'will-override-the-default-id'
-})
-    .then(res => {
-      console.log('Amplitude response', res)
-    })
+amplitude
+  .track({
+    event_type: 'some value',
+    user_id: 'will-override-the-default-id'
+  })
+  .then(res => {
+    console.log('Amplitude response', res)
+  })
 ```
 
 ### Promises
@@ -248,22 +250,24 @@ amplitude.track({
 All methods return a Promise.
 
 ```javascript
-amplitude.track(data)
+amplitude
+  .track(data)
   .then(function(result) {
     //... do something
-  }).catch(function(error) {
+  })
+  .catch(function(error) {
     //... do something
   })
 
 // Or..
 try {
-    const result = await amplitude.track({
-      event_type: 'some value'
-    })
-    //... do something with result
+  const result = await amplitude.track({
+    event_type: 'some value'
+  })
+  //... do something with result
 } catch (error) {
-    console.error(error)
-    //... do something with the error
+  console.error(error)
+  //... do something with the error
 }
 ```
 
@@ -281,10 +285,12 @@ const stream = fs.createWriteStream('./may-2016-export.zip')
 
 const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
-amplitude.export({
-  start: '20160501T20',
-  end: '20160601T20'
-}).pipe(stream)
+amplitude
+  .export({
+    start: '20160501T20',
+    end: '20160601T20'
+  })
+  .pipe(stream)
 ```
 
 ### User Search
@@ -317,7 +323,7 @@ Get a user summary and their recent events. This method requires an Amplitude ID
 ```javascript
 const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
-amplitude.userActivity('Amplitude ID').then(function (res) {
+amplitude.userActivity('Amplitude ID').then(function(res) {
   const userData = res.userData // data about the user
   const events = res.events // an array of events associated with the user
 })
@@ -349,16 +355,19 @@ If you do not know the Amplitude ID, you can use the [userSearch](#user-search) 
 ```javascript
 const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
-amplitude.userSearch('user-id').then(function (res) {
-  // If you're using a prefix, you may get multiple matches and
-  // you may need to handle the case where there is not a match
-  const match = res.matches[0]
+amplitude
+  .userSearch('user-id')
+  .then(function(res) {
+    // If you're using a prefix, you may get multiple matches and
+    // you may need to handle the case where there is not a match
+    const match = res.matches[0]
 
-  return amplitude.userActivity(match.amplitude_id)
-}).then(function (res) {
-  const userData = res.userData // data about the user
-  const events = res.events // an array of events associated with the user
-})
+    return amplitude.userActivity(match.amplitude_id)
+  })
+  .then(function(res) {
+    const userData = res.userData // data about the user
+    const events = res.events // an array of events associated with the user
+  })
 ```
 
 ### Event Segmentation
@@ -370,16 +379,17 @@ Get metrics for an event with segmentation.
 ```javascript
 const amplitude = new Amplitude('api-token', { secretKey: 'secret' })
 
-amplitude.eventSegmentation({
-  e: {
-    'event_type': 'event_name'
-  },
-  start: '20170104',
-  end: '20170117',
-})
-.then((res) => {
-  const segmentationData = res.data
-})
+amplitude
+  .eventSegmentation({
+    e: {
+      event_type: 'event_name'
+    },
+    start: '20170104',
+    end: '20170117'
+  })
+  .then(res => {
+    const segmentationData = res.data
+  })
 ```
 
 Example response:
@@ -387,7 +397,7 @@ Example response:
 ```javascript
 { series: [ [ 2, 25, 3, 1, 0, 0, 2, 3, 5, 1, 0, 0, 0, 0 ] ],
   seriesLabels: [ 0 ],
-  xValues: 
+  xValues:
    [ '2017-01-04',
      '2017-01-05',
      '2017-01-06',
@@ -416,8 +426,8 @@ Do not change anything below this comment. It is generated automatically.
 
 ## Contributors
 
-+ [Erki Esken](http://deekit.net/)
-+ [Matthew Keesan](http://keesan.net)
-+ [Geoff Dutton](https://github.com/geoffdutton)
-+ Matt Pardee
-+ [Chase Seibert](http://chase-seibert.github.io/blog/)
+- [Erki Esken](http://deekit.net/)
+- [Matthew Keesan](http://keesan.net)
+- [Geoff Dutton](https://github.com/geoffdutton)
+- Matt Pardee
+- [Chase Seibert](http://chase-seibert.github.io/blog/)

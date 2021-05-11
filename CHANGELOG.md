@@ -1,5 +1,8 @@
 # Amplitude Change Log
 
+## v5.1.6
+- Security update for `lodash`
+
 ## v5.1.5
 - Security update for `y18n` 
 
